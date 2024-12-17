@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import Obstacles from "@/graphics/Obstacles.js";
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'; // Import OrbitControls
 
 export default class Graphics {
     constructor(canvas) {
@@ -10,10 +12,22 @@ export default class Graphics {
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.scene.background = new THREE.Color(0x87CEEB); // Set background color
         this.camera.position.z = 5;
+        this.camera.position.y = 3;
+        this.camera.position.x = -2;
+
+
+        // Initialize OrbitControls
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.enableDamping = true; // Enable damping (inertia)
+        this.controls.dampingFactor = 0.25; // Set damping factor
+        this.controls.screenSpacePanning = false; // Disable screen space panning (optional)
+        this.controls.maxPolarAngle = Math.PI / 2; // Prevent going below the ground
+
         this.gravity = -0.1; // Gravity strength
         this.jumpStrength = 0.2; // Jump strength
         this.isJumping = false;
         this.velocityY = 0;
+        this.createObstacles();
 
         // Initialize loader
         this.loaderGLTF = new GLTFLoader(); // Initialize the GLTF loader
@@ -51,6 +65,10 @@ export default class Graphics {
             // Apply gravity
             this.applyGravity();
         }
+
+        // Update OrbitControls
+        this.controls.update(); // Only required if controls.enableDamping = true, or if controls.enableZoom = true
+
         // Render the scene
         this.renderer.render(this.scene, this.camera);
         requestAnimationFrame(this.gameLoop.bind(this));
@@ -73,11 +91,11 @@ export default class Graphics {
 
     applyGravity() {
         // Apply gravity if the player is above the ground
-        if (this.player.position.y > -3) {
+        if (this.player.position.y > -0) {
             this.velocityY += this.gravity; // Gravity applies
         } else {
             this.velocityY = 0; // Stop falling
-            this.player.position.y = -3; // Stop at ground level
+            this.player.position.y = 0; // Stop at ground level
             this.isJumping = false; // Reset jump status when grounded
         }
 
@@ -108,7 +126,7 @@ export default class Graphics {
     }
 
     createGround() {
-        const groundGeometry = new THREE.PlaneGeometry(20, 1);
+        const groundGeometry = new THREE.BoxGeometry(200, 0.1,1);
         const texture = new THREE.TextureLoader().load("src/threejs/assets/textures/stone512x512.jpg");
         texture.wrapS = THREE.RepeatWrapping;
         texture.wrapT = THREE.RepeatWrapping;
@@ -117,7 +135,7 @@ export default class Graphics {
 
         const groundMaterial = new THREE.MeshStandardMaterial({ map: texture }); // Changed to MeshStandardMaterial
         this.ground = new THREE.Mesh(groundGeometry, groundMaterial);
-        this.ground.position.y = -3; // Position it at the bottom
+        this.ground.position.y = -0; // Position it at the bottom
         this.scene.add(this.ground);
     }
 
@@ -150,6 +168,14 @@ export default class Graphics {
         }, undefined, (error) => {
             console.error('Error loading GLTF model:', error);
         });
+    }
+
+    createObstacles() {
+        const obst = new Obstacles();
+        let obstacles = obst.createBoxes(20);
+        for (let i = 0; i < obstacles.length; i++) {
+            this.scene.add(obstacles[i]);
+        }
     }
 
     addEventListeners() {

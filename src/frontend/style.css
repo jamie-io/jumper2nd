@@ -39,8 +39,8 @@ body {
   margin: 0;
   display: flex;
   place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  height: 100%; /* Ensure the body takes up full height */
+  width: 100%;  /* Ensure the body takes up full width */
 }
 
 h1 {
@@ -72,10 +72,10 @@ button:focus-visible {
 }
 
 #app {
-  max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0; /* Remove any extra padding */
   text-align: center;
+  width: 100%; /* Full width */
 }
 
 @media (prefers-color-scheme: light) {

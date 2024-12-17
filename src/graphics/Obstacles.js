@@ -1,20 +1,23 @@
 import * as THREE from "three";
-import {Vector2} from "three";
-import {texture} from "three/tsl";
+import {h} from "vue";
 
 export default class Obstacles {
     constructor() {
         this.obstacles = [];
     }
-    createBoxes(amount, width=1, height=1) {
-        const obstacle = [];
+
+    createBoxes(amount, width = 0.5, height = 0.5) {
         const geometry = new THREE.BoxGeometry(width, height);
-        const texture = new THREE.TextureLoader().load("src/threejs/assets/textures/woodBoxText.jpg")
-        const material = new THREE.MeshBasicMaterial({map: texture})
-        const mesh = new THREE.Mesh(geometry, material);
+        const texture = new THREE.TextureLoader().load("src/threejs/assets/textures/woodBoxText.jpg");
+        const material = new THREE.MeshBasicMaterial({ map: texture });
+
         for (let i = 0; i < amount; i++) {
-            this.obstacle.push(mesh);
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.y = height/2+0.1;
+            mesh.position.x = i*2+2
+            this.obstacles.push(mesh);  // Correctly pushing into the obstacles array
         }
-        return obstacle;
+
+        return this.obstacles;  // Returning the updated obstacles array
     }
 }
