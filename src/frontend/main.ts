@@ -5,7 +5,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 // Import components
 import GamePage from './components/GamePage.vue';
 import StartingPage from './components/StartingPage.vue';
-import Scoreboard from './components/Scoreboard.vue';
+import Scoreboard from "./components/Scoreboard.vue";
 
 // Define routes
 const routes = [

@@ -1,30 +1,34 @@
 <template>
   <div class="game-container">
-    <canvas ref="gameCanvas"></canvas>
+    <canvas ref="gameCanvas" width="1200" height="900"></canvas>
   </div>
 </template>
 
 <script>
-import Graphics from "@/graphics/index.js";
+// Import the Graphics class
+import Graphics from '@/graphics/index';
 
 export default {
-  name: "Game",
+  name: 'Game',
   mounted() {
-    const canvas = this.gameCanvas;
+    // Initialize and start the graphics rendering
+    const canvas = this.$refs.gameCanvas;
     const graphics = new Graphics(canvas);
-  },
+    graphics.start();
+  }
 };
 </script>
 
 <style scoped>
 .game-container {
-  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   height: 100vh;
-  overflow: hidden;
+  background-color: #87CEEB;
 }
+
 canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
+  border: 1px solid black;
 }
 </style>
