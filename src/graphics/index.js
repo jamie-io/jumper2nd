@@ -1,19 +1,31 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import Obstacles from "@/graphics/Obstacles.js";
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'; // Import OrbitControls
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { Vector3 } from "three";
 
 export default class Graphics {
     constructor(canvas) {
         this.canvas = canvas;
         this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas });
         this.renderer.setSize(window.innerWidth, window.innerHeight); // Set canvas size to window size
+        // Set custom background image
+        const textureLoader = new THREE.TextureLoader();
+        textureLoader.load('src/threejs/assets/textures/horror_wall_09-512x512.png', (texture) => {
+            texture.generateMipmaps = false; // Disable mipmaps
+            texture.minFilter = THREE.LinearFilter; // Set to linear filtering to maintain sharpness
+            texture.magFilter = THREE.LinearFilter;
+            this.scene.background = texture;
+        });
+
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.scene.background = new THREE.Color(0x87CEEB); // Set background color
         this.camera.position.z = 5;
         this.camera.position.y = 3;
         this.camera.position.x = -2;
+
+        this.renderer.setPixelRatio(window.devicePixelRatio);
 
 
         // Initialize OrbitControls
@@ -22,6 +34,12 @@ export default class Graphics {
         this.controls.dampingFactor = 0.25; // Set damping factor
         this.controls.screenSpacePanning = false; // Disable screen space panning (optional)
         this.controls.maxPolarAngle = Math.PI / 2; // Prevent going below the ground
+
+        // Disable zoom in and out on the z-axis (this prevents movement along the z-axis)
+        this.controls.enableZoom = true;
+        this.controls.zoomSpeed = 0.5;
+        this.controls.minDistance = 5; // Minimum distance (no zooming in)
+        this.controls.maxDistance = 5; // Maximum distance (no zooming out)
 
         this.gravity = -0.1; // Gravity strength
         this.jumpStrength = 0.2; // Jump strength
@@ -126,16 +144,17 @@ export default class Graphics {
     }
 
     createGround() {
-        const groundGeometry = new THREE.BoxGeometry(200, 0.1,1);
+        const size = new Vector3(200, 0.1, 1);
+        const groundGeometry = new THREE.BoxGeometry(size.x, size.y, size.z);
         const texture = new THREE.TextureLoader().load("src/threejs/assets/textures/stone512x512.jpg");
         texture.wrapS = THREE.RepeatWrapping;
         texture.wrapT = THREE.RepeatWrapping;
         texture.repeat.set( 8, 32 );
         texture.rotation = Math.PI / 2; // Rotate the texture by 45 degrees (PI / 4 radians)
-
         const groundMaterial = new THREE.MeshStandardMaterial({ map: texture }); // Changed to MeshStandardMaterial
         this.ground = new THREE.Mesh(groundGeometry, groundMaterial);
-        this.ground.position.y = -0; // Position it at the bottom
+        this.ground.position.y = 0; // Position it at the bottom
+        this.ground.position.x = size.x/2;
         this.scene.add(this.ground);
     }
 
@@ -150,8 +169,7 @@ export default class Graphics {
         // GLTF loader example
         this.loaderGLTF.load(modelPath, (gltf) => {
             const model = gltf.scene;
-            model.scale.set(1, 1, 1); // Set the size
-
+            model.scale.set(0.8, 0.8, 0.8); // Set the size
             model.traverse((child) => {
                 if (child.isMesh) {
                     // Apply the texture to each mesh
@@ -159,10 +177,10 @@ export default class Graphics {
                     child.material.needsUpdate = true; // Ensure the material is updated
                     console.log('Texture applied to mesh:', child.name);
                 }
-            });
+                model.rotation.y = -Math.PI / 2;
 
+            });
             this.player = model;
-            this.player.position.set(0, -3, 0); // Position player above the ground
             this.scene.add(this.player);
 
         }, undefined, (error) => {
@@ -172,10 +190,13 @@ export default class Graphics {
 
     createObstacles() {
         const obst = new Obstacles();
-        let obstacles = obst.createBoxes(20);
-        for (let i = 0; i < obstacles.length; i++) {
-            this.scene.add(obstacles[i]);
-        }
+        const obstaclesInfo = obst.createBoxes(20); // Create 20 obstacles and their info
+
+        // Loop through the obstaclesInfo to add them to the scene
+        obstaclesInfo.forEach(info => {
+            this.scene.add(info.obstacle); // Add the obstacle mesh to the scene
+            this.scene.add(info.boxHelper); // Add the bounding box helper to the scene for visualization
+        });
     }
 
     addEventListeners() {
