@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import Graphics from "@/graphics/index";
+import Graphics from "@/graphics/index.js";
 
 export default {
   name: "Game",

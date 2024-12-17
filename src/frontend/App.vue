@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import Game from "@/components/Game.vue";
+import Game from "@/frontend/components/Game.vue";
 
 export default {
   name: "App",

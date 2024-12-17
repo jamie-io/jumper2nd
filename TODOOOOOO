@@ -1,0 +1,18 @@
+Frontend:
+Startscreen:
+    - Start Game --> Game
+    - Multiplayer --> component
+    - Settings --> component
+
+Backend:
+- Sqlite config:
+    - Players:
+        id | name
+    - Rooms:
+        id | roomname | randomID
+
+- Go Server hosten
+- Websockets öffnen und offen halten
+
+- Anfragen handeln
+- Playerstats empfangen / senden
