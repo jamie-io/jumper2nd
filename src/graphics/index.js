@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'; // GLTFLoader import
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 export default class Graphics {
     constructor(canvas) {
@@ -17,6 +17,9 @@ export default class Graphics {
 
         // Initialize loader
         this.loaderGLTF = new GLTFLoader(); // Initialize the GLTF loader
+
+        // Add lights to the scene
+        this.createLights();
 
         // Add ground
         this.createGround();
@@ -89,15 +92,30 @@ export default class Graphics {
         }
     }
 
+    createLights() {
+        // Add an ambient light (soft, non-directional light)
+        const ambientLight = new THREE.AmbientLight(0x404040, 1); // Light gray color with intensity of 1
+        this.scene.add(ambientLight);
+
+        // Add a directional light (simulates sunlight)
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1); // White light with intensity of 1
+        directionalLight.position.set(5, 5, 5); // Position the light
+        this.scene.add(directionalLight);
+
+        // Optional: Add a helper to visualize the directional light (for debugging)
+        const lightHelper = new THREE.DirectionalLightHelper(directionalLight, 1);
+        this.scene.add(lightHelper);
+    }
+
     createGround() {
         const groundGeometry = new THREE.PlaneGeometry(20, 1);
-        const texture = new THREE.TextureLoader().load("src/threejs/assets/textures/stone512x512.jpg")
+        const texture = new THREE.TextureLoader().load("src/threejs/assets/textures/stone512x512.jpg");
         texture.wrapS = THREE.RepeatWrapping;
         texture.wrapT = THREE.RepeatWrapping;
         texture.repeat.set( 8, 32 );
         texture.rotation = Math.PI / 2; // Rotate the texture by 45 degrees (PI / 4 radians)
 
-        const groundMaterial = new THREE.MeshBasicMaterial({ map: texture });
+        const groundMaterial = new THREE.MeshStandardMaterial({ map: texture }); // Changed to MeshStandardMaterial
         this.ground = new THREE.Mesh(groundGeometry, groundMaterial);
         this.ground.position.y = -3; // Position it at the bottom
         this.scene.add(this.ground);
@@ -105,8 +123,8 @@ export default class Graphics {
 
     createPlayer() {
         // Load GLB model with texture
-        const modelPath = 'src/threejs/assets/models/Soldier.glb'; // or 'path_to_your_model.obj'
-        const texturePath = 'src/threejs/assets/textures/grasslight-big.jpg'; // Set the texture path
+        const modelPath = 'src/threejs/assets/models/Soldier.glb'; // Replace with your model path
+        const texturePath = 'src/threejs/assets/textures/grasslight-big.jpg'; // Replace with your texture path
 
         const textureLoader = new THREE.TextureLoader();
         const texture = textureLoader.load(texturePath);
@@ -115,14 +133,20 @@ export default class Graphics {
         this.loaderGLTF.load(modelPath, (gltf) => {
             const model = gltf.scene;
             model.scale.set(1, 1, 1); // Set the size
+
             model.traverse((child) => {
                 if (child.isMesh) {
-                    child.material.map = texture; // Apply the texture
+                    // Apply the texture to each mesh
+                    child.material.map = texture;
+                    child.material.needsUpdate = true; // Ensure the material is updated
+                    console.log('Texture applied to mesh:', child.name);
                 }
             });
+
             this.player = model;
             this.player.position.set(0, -3, 0); // Position player above the ground
             this.scene.add(this.player);
+
         }, undefined, (error) => {
             console.error('Error loading GLTF model:', error);
         });
