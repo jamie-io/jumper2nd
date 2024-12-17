@@ -5,17 +5,15 @@ export default class Graphics {
     constructor(canvas) {
         this.canvas = canvas;
         this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas });
-        this.renderer.setSize(canvas.width, canvas.height);
+        this.renderer.setSize(window.innerWidth, window.innerHeight); // Set canvas size to window size
         this.scene = new THREE.Scene();
-        this.camera = new THREE.PerspectiveCamera(75, canvas.width / canvas.height, 0.1, 1000);
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.scene.background = new THREE.Color(0x87CEEB); // Set background color
         this.camera.position.z = 5;
         this.gravity = -0.1; // Gravity strength
         this.jumpStrength = 0.2; // Jump strength
         this.isJumping = false;
         this.velocityY = 0;
-        this.setCanvasSize(); // Set canvas size initially
-
 
         // Initialize loader
         this.loaderGLTF = new GLTFLoader(); // Initialize the GLTF loader
@@ -26,8 +24,11 @@ export default class Graphics {
         this.createPlayer();
 
         // Handle keyboard input
-        this.keys = { left: false, right: false, space: false };
+        this.keys = { left: false, right: false, space: false, down: false };
         this.addEventListeners();
+
+        // Adjust camera aspect ratio for window resizing
+        window.addEventListener('resize', this.setCanvasSize.bind(this));
     }
 
     start() {
@@ -60,35 +61,43 @@ export default class Graphics {
             this.player.position.x += 0.1; // Move right
         }
         if (this.keys.space && !this.isJumping) {
-            this.jump();
+            this.jump(); // Jump
+        }
+        if (this.keys.down) {
+            this.player.position.y -= 0.1; // Move down manually
         }
     }
 
     applyGravity() {
-        if (this.player.position.y > -2) {
-            // If the player is above the ground, apply gravity
-            this.velocityY += this.gravity;
+        // Apply gravity if the player is above the ground
+        if (this.player.position.y > -3) {
+            this.velocityY += this.gravity; // Gravity applies
         } else {
-            // When the player touches the ground, stop the fall and reset jumping status
-            this.velocityY = 0;
-            this.player.position.y = -2; // Keep the player at ground level
-            this.isJumping = false; // Allow jumping again when touching the ground
+            this.velocityY = 0; // Stop falling
+            this.player.position.y = -3; // Stop at ground level
+            this.isJumping = false; // Reset jump status when grounded
         }
 
-        this.player.position.y += this.velocityY;
+        this.player.position.y += this.velocityY; // Apply vertical movement
     }
 
     jump() {
-        // Only allow jumping if the player is not already in the air
+        // Only allow jumping if not already jumping
         if (!this.isJumping) {
-            this.velocityY = this.jumpStrength; // Give the player an initial upward velocity
-            this.isJumping = true; // Set the jump status to true
+            this.velocityY = this.jumpStrength; // Jump with initial upward velocity
+            this.isJumping = true; // Set jumping status
         }
     }
 
     createGround() {
         const groundGeometry = new THREE.PlaneGeometry(20, 1);
-        const groundMaterial = new THREE.MeshBasicMaterial({ color: 0x228B22 });
+        const texture = new THREE.TextureLoader().load("src/threejs/assets/textures/stone512x512.jpg")
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set( 8, 32 );
+        texture.rotation = Math.PI / 2; // Rotate the texture by 45 degrees (PI / 4 radians)
+
+        const groundMaterial = new THREE.MeshBasicMaterial({ map: texture });
         this.ground = new THREE.Mesh(groundGeometry, groundMaterial);
         this.ground.position.y = -3; // Position it at the bottom
         this.scene.add(this.ground);
@@ -112,7 +121,7 @@ export default class Graphics {
                 }
             });
             this.player = model;
-            this.player.position.set(0, -3, 0);
+            this.player.position.set(0, -3, 0); // Position player above the ground
             this.scene.add(this.player);
         }, undefined, (error) => {
             console.error('Error loading GLTF model:', error);
@@ -127,8 +136,11 @@ export default class Graphics {
             if (e.key === 'ArrowRight') {
                 this.keys.right = true;
             }
-            if (e.key === 'ArrowUp' && !this.isJumping) { // Listen for ArrowUp
+            if (e.key === 'ArrowUp' && !this.isJumping) { // Listen for ArrowUp for jumping
                 this.keys.space = true;
+            }
+            if (e.key === 'ArrowDown') { // Listen for ArrowDown to move down
+                this.keys.down = true;
             }
         });
 
@@ -139,8 +151,11 @@ export default class Graphics {
             if (e.key === 'ArrowRight') {
                 this.keys.right = false;
             }
-            if (e.key === 'ArrowUp') { // Listen for ArrowUp
+            if (e.key === 'ArrowUp') { // Listen for ArrowUp for jumping
                 this.keys.space = false;
+            }
+            if (e.key === 'ArrowDown') { // Stop moving down
+                this.keys.down = false;
             }
         });
     }
