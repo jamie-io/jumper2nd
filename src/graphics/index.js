@@ -15,6 +15,11 @@ export default class Graphics {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
+        // OrbitControls setup
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.enableDamping = true; // Smooth damping for controls
+        this.controls.dampingFactor = 0.05;
+
         // Background
         const textureLoader = new THREE.TextureLoader();
         textureLoader.load('src/threejs/assets/textures/horror_wall_09-512x512.png', (texture) => {
@@ -72,6 +77,9 @@ export default class Graphics {
             this.spawnObstacles();
             this.checkCollisions();
         }
+
+        // Update OrbitControls
+        this.controls.update();
 
         this.renderer.render(this.scene, this.camera);
         requestAnimationFrame(this.gameLoop.bind(this));
