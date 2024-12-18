@@ -1,5 +1,13 @@
 <template>
   <div class="game-container">
+    <v-btn
+      color="primary"
+      outlined
+      class="top-left-button"
+      to="/"
+    >
+      Zurück zur Startseite
+    </v-btn>
     <canvas ref="gameCanvas"></canvas>
   </div>
 </template>
@@ -30,5 +38,11 @@ canvas {
   display: block;
   width: 100%;
   height: 100%;
+}
+.top-left-button {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
 }
 </style>
