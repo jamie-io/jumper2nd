@@ -35,9 +35,9 @@ export default class Graphics {
 
         // Game parameters
         this.gameSpeed = 0.1;
-        this.obstacleSpeed = 0.2;
+        this.obstacleSpeed = 0.1;
         this.obstacles = [];
-        this.maxObstacles = 10;
+        this.maxObstacles = 1;
         this.obstacleSpawnDistance = 20;
 
         // Player physics
@@ -86,12 +86,12 @@ export default class Graphics {
     }
 
     handlePlayerMovement() {
-        // Horizontal movement
+        // Move along the Z-axis instead of X-axis
         if (this.keys.left) {
-            this.player.position.x = Math.max(this.player.position.x - 0.1, -2);
+            this.player.position.z = Math.max(this.player.position.z - 0.1, -2); // Move left on the Z-axis
         }
         if (this.keys.right) {
-            this.player.position.x = Math.min(this.player.position.x + 0.1, 2);
+            this.player.position.z = Math.min(this.player.position.z + 0.1, 2); // Move right on the Z-axis
         }
 
         // Jumping
@@ -122,15 +122,16 @@ export default class Graphics {
     spawnObstacles() {
         // Limit total number of obstacles
         if (this.obstacles.length < this.maxObstacles) {
-            const geometry = new THREE.BoxGeometry(1, 1, 1);
-            const material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+            const geometry = new THREE.BoxGeometry(2, 1, 1);
+            const texture = new THREE.TextureLoader().load("src/threejs/assets/textures/woodBoxText.jpg");
+            const material = new THREE.MeshStandardMaterial({ map: texture });
             const obstacle = new THREE.Mesh(geometry, material);
 
             // Spawn obstacles at a distance with random vertical positioning
             obstacle.position.set(
                 this.obstacleSpawnDistance,
                 Math.random() * 2,  // Random height
-                0
+                Math.random() * 2
             );
 
             this.obstacles.push(obstacle);
@@ -182,7 +183,13 @@ export default class Graphics {
 
     createGround() {
         const groundGeometry = new THREE.PlaneGeometry(200, 10);
-        const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+        const texture = new THREE.TextureLoader().load("src/threejs/src/textures/stone512x512.jpg");
+        texture.needsUpdate = true;
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(2, 20); // Repeats the texture 2x horizontally and vertically
+        texture.rotation = Math.PI / 2;
+        const groundMaterial = new THREE.MeshStandardMaterial({ map: texture });
         this.ground = new THREE.Mesh(groundGeometry, groundMaterial);
         this.ground.rotation.x = -Math.PI / 2;
         this.ground.position.y = 0;
@@ -195,8 +202,9 @@ export default class Graphics {
         const loader = new GLTFLoader();
         loader.load(modelPath, (gltf) => {
             this.player = gltf.scene;
-            this.player.scale.set(0.5, 0.5, 0.5);
+            this.player.scale.set(1, 1, 1);
             this.player.position.set(0, 0, 0);
+            this.player.rotation.y = -Math.PI / 2;
             this.scene.add(this.player);
         }, undefined, (error) => {
             console.error('Error loading player model:', error);
