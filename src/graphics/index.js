@@ -221,5 +221,5 @@ export default class Graphics {
     }
 }
 
-const canvas = document.querySelector('#app');
-const game = new Graphics(canvas);
+// const canvas = document.querySelector('game-container');
+// const game = new Graphics(canvas);
