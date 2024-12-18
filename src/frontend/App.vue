@@ -1,12 +1,13 @@
 <template>
-  <Game />
+  <v-app>
+    <v-main>
+      <RouterView />
+    </v-main>
+  </v-app>
 </template>
 
 <script>
-import Game from "@/frontend/components/Game.vue";
-
 export default {
-  name: "App",
-  components: { Game },
+  name: 'App',
 };
 </script>
