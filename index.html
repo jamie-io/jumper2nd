@@ -1,13 +1,39 @@
 <!doctype html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Jump Game</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/frontend/main.ts"></script>
-  </body>
+    <style>
+        /* HUD styling */
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 20px;
+            font-family: Arial, sans-serif;
+            z-index: 10;
+        }
+        /* Make sure the canvas fills the screen */
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100%;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<div id="hud">
+    Score: <span id="score">0</span>
+</div>
+<!-- Use canvas here instead of div -->
+<canvas id="app"></canvas>
+<script type="module" src="src/graphics/index.js"></script>
+</body>
 </html>
