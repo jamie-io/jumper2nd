@@ -5,13 +5,17 @@
 </template>
 
 <script>
-import Graphics from "@/graphics/index.js";
+import Graphics from "@/graphics/index.js"; // Ensure this path is correct
 
 export default {
   name: "Game",
   mounted() {
-    const canvas = this.gameCanvas;
-    const graphics = new Graphics(canvas);
+    // Access the canvas reference and initialize the Three.js scene
+    const canvas = this.$refs.gameCanvas;
+    const graphics = new Graphics(canvas); // Pass the canvas element to the Graphics class
+
+    // Optionally, you can start the game logic or animation loop here if needed
+    graphics.start();
   },
 };
 </script>
