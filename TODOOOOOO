@@ -1,4 +1,12 @@
 Frontend:
+
+Game.vue: 
+    - API ans Backend anbinden
+CreateRoomFrame.vue:
+    - API ans backend anbinden
+JoinRoomFrame.vue:
+    - API ans backend anbinden
+
 Startscreen:
     - Start Game --> Game
     - Multiplayer --> component
